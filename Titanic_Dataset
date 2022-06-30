@@ -1,0 +1,76 @@
+#importing Packages
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import pandas as pd
+#from sklearn.datasets import load_iris
+
+#load dataset
+df =pd.read_csv("C:/Users/Home/Documents/Snehal/tested.csv")
+print(df)
+
+#Creating Instance
+rf=RandomForestClassifier()
+
+#Dealing with Missing Values
+df['Age'] = df['Age'].fillna((df['Age'].mean ()))
+df['Fare']=df['Fare'].fillna((df['Fare'].mean ()))
+dropList= ['Embarked','Name','Ticket']
+
+#x and y values
+x=df.drop(dropList,axis=1)
+y=df["Embarked"]
+
+#Encoding Features
+from sklearn.preprocessing import  LabelEncoder
+le=LabelEncoder()
+le.fit(y)
+
+x['Sex'] = le.fit_transform(x['Sex'])
+x['Cabin'] = le.fit_transform(x['Cabin'])
+
+y=le.fit_transform(y)
+
+
+#Traning and Testing
+x_train,x_test,y_train,y_test=train_test_split(x,y,random_state=0,test_size=0.3)
+rf.fit(x_train,y_train)
+
+# Predection and Error
+y_pred=rf.predict(x_test)
+print("Random Forest : ",mean_squared_error(y_test,y_pred))
+
+#feature selection
+from sklearn.ensemble import ExtraTreesClassifier
+import matplotlib.pyplot as plt
+
+model = ExtraTreesClassifier()
+model.fit(x,y)
+
+print(model.feature_importances_)
+
+feat_imp = pd.Series(model.feature_importances_,index=x.columns)
+feat_imp.nlargest(13).plot(kind='barh')
+plt.show()
+
+#OUTPUT
+'''
+ PassengerId  Survived  Pclass  ...      Fare Cabin  Embarked
+0            892         0       3  ...    7.8292   NaN         Q
+1            893         1       3  ...    7.0000   NaN         S
+2            894         0       2  ...    9.6875   NaN         Q
+3            895         0       3  ...    8.6625   NaN         S
+4            896         1       3  ...   12.2875   NaN         S
+..           ...       ...     ...  ...       ...   ...       ...
+413         1305         0       3  ...    8.0500   NaN         S
+414         1306         1       1  ...  108.9000  C105         C
+415         1307         0       3  ...    7.2500   NaN         S
+416         1308         0       3  ...    8.0500   NaN         S
+417         1309         0       3  ...   22.3583   NaN         C
+
+[418 rows x 12 columns]
+Random Forest :  0.8174603174603174
+[0.20572532 0.01264272 0.0771806  0.01325759 0.17960174 0.06413425
+ 0.04875661 0.31103116 0.08767001]
+'''
